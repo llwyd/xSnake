@@ -6,11 +6,11 @@
 #include <X11/Xutil.h>
 //xSnake.c
 //T.Lloyd 2016
+ 
 typedef struct{
 	//int * x;
 	//int * y;
 	int x,y;
-	int * body;
 	int size;
 }
 snake;
@@ -32,7 +32,8 @@ void updateGame(Display *d,Window w,GC gc,snake boa,food f,gui g){
 	//Draw Snake
 	XFillRectangle(d,w,gc,boa.x,boa.y,50,50);
 	//Draw Food
-	XFillRectangle(d,w,gc,f.x,f.y,25,25);
+	XFillRectangle(d,w,gc,f.x+10,f.y+10,30,30);
+
 }
 int main(void){
 	//=====================gui Initialisation=====================
@@ -69,8 +70,8 @@ int main(void){
 	boa.y=0;
 	//=====================food Initialisation=====================
 	food f;
-	food.x=10;
-	food.y=10;
+	f.x=0;
+	f.y=0;
 	//=====================Physics Initialisation=====================
 	int dy=0;
 	int dx=1;
@@ -86,7 +87,6 @@ int main(void){
 			}
 			if(e.type==KeyPress){
 				XLookupString(&e.xkey,keys,ksize,&key,NULL);
-				//printf("%d\n",keys[0]);
 				switch(keys[0]){
 					case 119://up
 						dy=-1;
@@ -111,9 +111,15 @@ int main(void){
 		else{
 			boa.x+=(50*dx);
 			boa.y+=(50*dy);
+			if((boa.x==f.x)&&(boa.y==f.y)){
+				f.x=(rand()%16)*50;
+				f.y=(rand()%12)*50;
+				boa.size++;
+			}
 			updateGame(d,w,gc,boa,f,g);
-		}
+		
 		usleep(((100*100)/2)*10*2);//Sleep
+	}
 	}
 	return 0;
 }
