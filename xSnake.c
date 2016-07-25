@@ -8,16 +8,16 @@
 //T.Lloyd 2016
  
 typedef struct{
-	//int * x;
-	//int * y;
-	int x,y;
+	int * x;
+	int * y;
+	//int x,y;
 	int size;
 }
 snake;
 typedef struct{
 	int x;
 	int y;
-	char score[5];
+	char score[10];//score=000\0
 }
 gui;
 typedef struct{
@@ -25,12 +25,29 @@ typedef struct{
 }
 food;
 
+void resetGame(Display *d,Window w,GC gc,snake boa,gui g){
+	boa.x[0]=0;
+	boa.y[0]=0;
+	boa.size=1;
+	snprintf(g.score,sizeof(g.score),"score=%d",0);
+}
 
+void gameOver(Display *d,Window w,GC gc, snake boa,gui g){
+		XClearWindow(d,w);
+		XDrawString(d,w,gc,g.x/2,g.y/2,"GAME OVER",sizeof("GAME OVER"));
+		XDrawString(d,w,gc,g.x/2,(g.y/2)+10,g.score,sizeof(g.score));
+
+}
 void updateGame(Display *d,Window w,GC gc,snake boa,food f,gui g){
 	//Clear Window
 	XClearWindow(d,w);
 	//Draw Snake
-	XFillRectangle(d,w,gc,boa.x,boa.y,50,50);
+	for(int i=boa.size-1;i>0;i--){
+		boa.x[i]=boa.x[i-1];
+		boa.y[i]=boa.y[i-1];
+		XFillRectangle(d,w,gc,boa.x[i],boa.y[i],50,50);
+	}
+	XFillRectangle(d,w,gc,boa.x[0],boa.y[0],50,50);
 	//Draw Food
 	XFillRectangle(d,w,gc,f.x+10,f.y+10,30,30);
 
@@ -66,12 +83,14 @@ int main(void){
 	//=====================Player Initialisation=====================
 	snake boa;
 	boa.size=1;
-	boa.x=0;
-	boa.y=0;
+	boa.x=calloc(16*12,sizeof(int));
+	boa.y=calloc(16*12,sizeof(int));
+	boa.x[0]=0;
+	boa.y[0]=0;
 	//=====================food Initialisation=====================
 	food f;
-	f.x=0;
-	f.y=0;
+	f.x=200;
+	f.y=200;
 	//=====================Physics Initialisation=====================
 	int dy=0;
 	int dx=1;
@@ -109,12 +128,22 @@ int main(void){
 			}
 		}
 		else{
-			boa.x+=(50*dx);
-			boa.y+=(50*dy);
-			if((boa.x==f.x)&&(boa.y==f.y)){
+			boa.x[0]+=(50*dx);
+			boa.y[0]+=(50*dy);
+			if((boa.x[0]==f.x)&&(boa.y[0]==f.y)){
 				f.x=(rand()%16)*50;
 				f.y=(rand()%12)*50;
 				boa.size++;
+				snprintf(g.score,sizeof(g.score),"score=%d",boa.size-1);
+			}
+			if((boa.x[0]>g.x)||(boa.x[0]<0)||(boa.y[0]>g.y)||(boa.y[0]<0)){
+				gameOver(d,w,gc,boa,g);
+				resetGame(d,w,gc,boa,g);
+				dy=0;
+				dx=1;
+				boa.size=1;
+				snprintf(g.score,sizeof(g.score),"score=%d",boa.size-1);
+				XNextEvent(d,&e);
 			}
 			updateGame(d,w,gc,boa,f,g);
 		
