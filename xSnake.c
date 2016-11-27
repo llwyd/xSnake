@@ -136,6 +136,19 @@ int main(void){
 				boa.size++;
 				snprintf(g.score,sizeof(g.score),"score=%d",boa.size-1);
 			}
+			//if(boa.size>1){
+			for(int i=1;i<boa.size;i++){
+				if(boa.x[0]==boa.x[i]&&boa.y[0]==boa.y[i]){
+					gameOver(d,w,gc,boa,g);
+					resetGame(d,w,gc,boa,g);
+					dy=0;
+					dx=0;
+					boa.size=1;
+					snprintf(g.score,sizeof(g.score),"score=%d",boa.size-1);
+					XNextEvent(d,&e);
+				}
+			}
+			//}
 			if((boa.x[0]>g.x)||(boa.x[0]<0)||(boa.y[0]>g.y)||(boa.y[0]<0)){
 				gameOver(d,w,gc,boa,g);
 				resetGame(d,w,gc,boa,g);
